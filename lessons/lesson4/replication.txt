@@ -1,0 +1,73 @@
+1. Переходим в директорию с вагрантфайлом и переносим его в другую директорию. Делаем vagrant up.
+
+2. Переименовывем вертуальную машину и пробрасываем порты.
+
+3. Создаём файл /etc/yum.repos.d/MariaDB.repo и вставляе в него код:
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.4/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+4. sudo yum update
+
+5. sudo yum install MariaDB-server MariaDB-client
+
+6. sudo systemctl start mariadb
+
+7. sudo mysql_secure_installation
+
+8. создадим виртуальную сеть
+
+9. сетевые адреса машин. клманда ip a
+centos 7-1 - master - 10.0.2.4
+centos 7-2 - slave - 10.0.2.6
+
+10. насторим мастер, указав в /etc/my.cnf:
+[mysqld] - обязательно
+server_id = 1
+log_bin = mysql-bin.log
+binlog_do_db = first
+
+11. перезапусакаем мастер
+sudo systemctl restart mysql
+
+12. На ​ master​ создаем пользователя, который будет отвечать за репликацию
+
+GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%' IDENTIFIED BY '123';
+FLUSH PRIViLEGES;
+
+13. для первой репликации производим синхронизацию с блокировкой
+
+USE first;
+FLUSH TABLES WITH READ LOCK
+
+14. Зафиксируем состояние мастера и передадим на реплику, чтобы она знала, с какого момента
+может реплицировать данные и запросы
+    SHOW MASTER STATUS;
+
+15. делаем дамп мастер БД, после чего разблокируем её
+mysqldump -u root -p first > first.sql
+UNLOCK tables;
+
+16. Создаем БД на ​ slave ​с таким же именем, как на мастер-сервере.
+sudo systemctl start mariadb
+sudo systemctl enable maria db
+
+17. Заливаем дамп из мастера на реплику.
+CREATE DATABASE first;
+mysqldump -u root -p first < /home/vagrant/first.sql
+
+18. Настраиваем реплику - конфиг
+[mysqld] - обязательно
+server_id = 2
+log_bin = mysql-bin.log
+binlog_do_db = first
+
+19. CHANGE MASTER TO MASTER_HOST​ =​ '10.0.2.4'​ ,​MASTER_USER​ =​ 'slave_user'​ ,
+    MASTER_PASSWORD​ =​ '123',
+    MASTER_LOG_FILE ​ =​​ 'mysql-bin.000001'​ ,​MASTER_LOG_POS ​ =​​ 640;
+    START SLAVE;
+
+    20. Проверяем работу репликации запросом:
+        SHOW SLAVE STATUS

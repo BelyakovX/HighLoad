@@ -23,7 +23,7 @@ class App
     {
         $this->config = $config;
         $this->components = new Storage();
-        //$this->runController();
+        $this->runController();
     }
 
     public function runController()
