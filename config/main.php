@@ -2,7 +2,7 @@
 return [
   'rootDir' => $_SERVER['DOCUMENT_ROOT'] . "/../",
   'templatesDir' => $_SERVER['DOCUMENT_ROOT'] . "/../view/",
-  'defaultController' => 'product',
+  'defaultController' => 'site',
   'controllerNamespace' => "app\\controllers\\",
   'components' => [
 //    'db' => [
