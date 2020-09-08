@@ -7,6 +7,13 @@ include ('../vendor/autoload.php');
 $config = include ('../config/main.php');
 
 use \app\base\App;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+$log = new Logger('server');
+$log->pushHandler(new StreamHandler('lof/my.log', Logger::INFO));
+$log->info(serialize($_SERVER));
+
 $time_start = microtime(true);
 App::call()->run($config);
 $time_end = microtime(true);
