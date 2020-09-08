@@ -5,26 +5,19 @@ ini_set('display_errors', 1);
 
 include ('../vendor/autoload.php');
 $config = include ('../config/main.php');
+
+use \app\base\App;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
-// create a log channel
-$log = new Logger('name');
-$log->pushHandler(new StreamHandler(__DIR__ . '/../log/my.log', Logger::WARNING));
-// add records to the log
-$log->warning('Foo');
-$log->error('Bar');
+$log = new Logger('server');
+$log->pushHandler(new StreamHandler('lof/my.log', Logger::INFO));
+$log->info(serialize($_SERVER));
 
-\app\base\Test::test();
+$time_start = microtime(true);
+App::call()->run($config);
+$time_end = microtime(true);
 
-$time_start = time();
-
-\app\base\App::call()->run($config);
-
-$time_end = time();
-
-$log = new Logger('time');
-$log -> pushHandler(new StreamHandler(__DIR__ . '/../log/time.log', Logger::DEBUG));
-
-$log -> debug ($time_end - $time_start);
-$log->debug (memory_get_peak_usage());
+$memory = memory_get_peak_usage();
+//0.585 сек
+echo "Скрипт отработал за " . ($time_end - $time_start) . " сек. Пик использования памяти: $memory байт";
