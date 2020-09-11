@@ -3,7 +3,7 @@
 
 namespace app\services\renderers;
 
-// отчечает за отображение пхп шаблонов
+// отвечает за отображение пхп шаблонов
 use app\base\App;
 use app\interfaces\IRenderer;
 
