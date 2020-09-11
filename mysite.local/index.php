@@ -13,6 +13,7 @@ use Monolog\Handler\StreamHandler;
 $log = new Logger('server');
 $log->pushHandler(new StreamHandler('lof/my.log', Logger::INFO));
 $log->info(serialize($_SERVER));
+$log->info('here');
 
 $time_start = microtime(true);
 App::call()->run($config);
